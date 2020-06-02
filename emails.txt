@@ -1,0 +1,4 @@
+//Holds a list of all of the emails you want to send a message to
+email@email.com
+email@email.com
+email@email.com

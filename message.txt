@@ -1,0 +1,10 @@
+//Message information file. Make sure there is only one 'subject' line
+//Adding an extra empty line in this file will add a new line in the email message
+subject: This is a subject.
+//Everything other than the 'subject:' line and comments (Indicated by "//") in this file will populate the email message
+Hello there,
+
+I am sending a message to you now.
+This is cool!
+
+Line 6 of the message
