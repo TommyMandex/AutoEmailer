@@ -4,13 +4,36 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-
+# import win32com.client as comclt
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.support.wait import WebDriverWait
 
 from selenium.webdriver.common.keys import Keys
 
+from selenium.common.exceptions import TimeoutException
+
+import pathlib
 
 import time
+
+# print (pathlib.Path(__file__).parent.absolute())
+# def uploadImage(self, file_path):
+# 	sleep = 1
+# 	windowsShell = comclt.Dispatch("WScript.Shell")
+# 	time.sleep(sleep)
+# 	windowsShell.SendKeys("{TAB}{TAB}{TAB}{TAB}{TAB}")
+# 	time.sleep(sleep)
+# 	windowsShell.SendKeys("{ENTER}")
+# 	time.sleep(sleep)
+# 	windowsShell.SendKeys(file_path)
+# 	time.sleep(sleep)
+# 	windowsShell.SendKeys("{TAB}{TAB}{TAB}{TAB}{TAB}")
+# 	time.sleep(sleep)
+# 	windowsShell.SendKeys(file_path)
+# 	time.sleep(sleep)
+# 	windowsShell.SendKeys("{TAB}{TAB}")
+# 	time.sleep(sleep)
+# 	windowsShell.SendKeys("{ENTER}")
 
 # Determines whether or not a text line is designated as a comment
 def isComment(line):
@@ -35,6 +58,7 @@ email = ""
 password = ""
 subject = ""
 message = []
+fileNames = []
 
 # Gets the target emails
 with open("emails.txt", "r") as file:
@@ -71,6 +95,13 @@ with open("message.txt", "r") as file:
 			else:
 				message.append(cleanLine(True, True, line))
 
+# Gets the names of the files you want to upload
+with open("files.txt", "r") as file:
+	for line in file:
+		if not isComment(line):
+			fileNames.append(cleanLine(True, True, line))
+
+
 capa = DesiredCapabilities.CHROME
 capa["pageLoadStrategy"] = "none"
 
@@ -86,15 +117,15 @@ wait = WebDriverWait(driver, 20)
 wait.until(EC.presence_of_element_located((By.NAME, 'loginfmt')))
 
 driver.find_element_by_name("loginfmt").send_keys(email)
-time.sleep(0.5)
+time.sleep(1)
 driver.find_element_by_id("idSIButton9").send_keys(Keys.ENTER)
-time.sleep(0.5)
+time.sleep(1)
 driver.find_element_by_id("i0118").send_keys(password)
-time.sleep(0.5)
+time.sleep(1)
 driver.find_element_by_id("idSIButton9").send_keys(Keys.ENTER)
 
 # Wait for webpage to load
-time.sleep(5)
+time.sleep(10)
 
 
 # Create a new email
@@ -102,7 +133,7 @@ for curEmail in targetEmails:
 	# Click new message
 	content = driver.find_elements_by_class_name("ms-Button--commandBar")
 	content[0].send_keys(Keys.ENTER)
-	time.sleep(2)
+	time.sleep(5)
 	# Adds sender address, the subject, and the message
 	senderAddressInput = driver.find_element_by_class_name("pickerInput_8d9d7e4e")
 	senderAddressInput.send_keys(curEmail)
@@ -117,9 +148,42 @@ for curEmail in targetEmails:
 		bodyInput.send_keys(Keys.ENTER)
 		time.sleep(0.5)
 	
+	# attachButton = driver.find_element_by_name("Attach")
+	# attachButton.send_keys(Keys.ENTER)
+
+	# browseButton = driver.find_element_by_name("Browse this computer")
+	# browseButton.send_keys(Keys.ENTER)
+
+	attachmentFile = driver.find_element_by_class_name("_3V5k9IEYQL5bVRI9nrKNj-")
+	for file_name in fileNames:
+		attachmentFile.send_keys(str(pathlib.Path(__file__).parent.absolute()) + "/files/" + file_name)
+
+	# Waiting until the file is uploaded
+
+	SHORT_TIMEOUT  = 5   # give enough time for the loading element to appear
+	LONG_TIMEOUT = 30  # give enough time for loading to finish
+	LOADING_ELEMENT_CLASS_NAME = 'ms-ProgressIndicator'
+
+	try:
+		# wait for loading element to appear
+		# - required to prevent prematurely checking if element
+		#   has disappeared, before it has had a chance to appear
+		WebDriverWait(driver, SHORT_TIMEOUT
+			).until(EC.presence_of_element_located((By.CLASS_NAME, LOADING_ELEMENT_CLASS_NAME)))
+
+		# then wait for the element to disappear
+		WebDriverWait(driver, LONG_TIMEOUT
+			).until_not(EC.presence_of_element_located((By.CLASS_NAME, LOADING_ELEMENT_CLASS_NAME)))
+
+	except TimeoutException:
+		pass 
+
+	print("Files uploaded.")
+	# time.sleep(5)
+
 	# Send message
-	sendButton = driver.find_element_by_class_name("y8XIN4EAeheOqsn4BJB7R")
-	ActionChains(driver).move_to_element(sendButton).click(sendButton).perform()
+	# sendButton = driver.find_element_by_class_name("y8XIN4EAeheOqsn4BJB7R")
+	# ActionChains(driver).move_to_element(sendButton).click(sendButton).perform()
 
 
 
