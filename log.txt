@@ -1,0 +1,1 @@
+//A log of all the emails sent will appear here.

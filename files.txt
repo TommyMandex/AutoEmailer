@@ -1,4 +1,4 @@
 //Add a raw file name (Including extension Ex [No Quotations]: "files.txt" NOT "files") and it will be uploaded to the email
-//Then put the file you want to upload inside of the 'files' folder
+//Then put the file you want to upload inside of the 'files_to_attach' folder
 picture1.jpg
 image2.png
